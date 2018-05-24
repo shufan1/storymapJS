@@ -8,10 +8,11 @@ from django.core.files.storage import FileSystemStorage
 from initialapp.models import *
 
 class rsvpForm(forms.ModelForm):
-	note = forms.CharField(widget=CKEditorWidget(), required=False)
-	class Meta:
-		fields = ['name','email','note']
-		model = rsvp
+			note =  forms.CharField(widget=CKEditorWidget(), required=False)
+			class Meta:
+							fields = ['name', 'email', 'note']
+							model = rsvp
+
 ##what are the differences between rsvpForm and rvsp
 
 ### build forms to accept input from site visitors,

@@ -1,25 +1,24 @@
 from django.shortcuts import render
 from initialapp.forms import rsvpForm
-
+from initialapp.models import rsvp
 # Create your views here.
 def index(request):
 		if request.method == 'POST':
-				form = rsvpForm(request.POST)
-				if form.is_valid():
-					name = request.POST.get('name', None)
-					email = request.POST.get('email', None)
-					note = request.POST.get('note', None)
-					rsvp1 = rsvp.objects.update_or_create(
-           		 								  name = name,
-           		 								  email = email,
-             									 note = note,
-             									 )
-					message = 'Thank you, see you in Boston'
-					##or we could send a comfirmation e-mail by built-in django function
-					return render(request, 'index.html', { 'message':message })
+					form = rsvpForm(request.POST)
+					if form.is_valid():
+								name = request.POST.get('name', None)
+								email = request.POST.get('email', None)
+								note = request.POST.get('note', None)
+								rsvp1 = rsvp.objects.update_or_create(
+           		 					    name = name,
+           		 						email = email,
+             							note = note,)
+								message = 'Thank you, see you in Boston'
+					                    ##or we could send a comfirmation e-mail by built-in django function
+								return render(request, 'index.html', { 'message':message })
 		else:
-				form = rsvpForm()
-				return render(request, 'index.html', { 'form':form })
+						form = rsvpForm()
+						return render(request, 'index.html', { 'form':form })
 ###if you send a POST request, we give you a message; else, we give you the form	
 def items(request):
 		item = Item.objects.all()
