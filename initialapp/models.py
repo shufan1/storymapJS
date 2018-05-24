@@ -30,11 +30,10 @@ class Item(models.Model):
 						super(Item, self).save(*args, **kwargs)
 		def __str__(self):
 					return self.title
-					
+
 class language(models.Model):
 		language = models.CharField(max_length =20, help_text="Enter the language of this book")
 		
 		def __str__(self):
 				return self.language
-		
 							
