@@ -57,28 +57,39 @@ class Command(BaseCommand):
 6. create a list of `<div>s or <p>s` in your XML files that you are going to iterate through, and create one slide for each onr of them.
 For example, I get a list of <div>s with `type = entry` for my StoryMaps:
 ```
-entries = []
-for div in root.iter(ns + 'div'):
-if div.get('type') == 'entry':
-entries.append(div)
-print (entries)	
+			entries = []
+			for div in root.iter(ns + 'div'):
+			if div.get('type') == 'entry':
+			entries.append(div)
+			print (entries)	
 ```
 #You could always add `print()` in your command. Print statements will be excuted when you run `python manage.pt command_name arguments`. They will be helpful in debugging. 
 
 7. Itterate thorugh the list your have made in ***Step 6***, and get the content you want to put into your StoryMap from XML file
 e.g.:
 ```
-for f, e in enumerate(entries):
-	div_text = ''
-   		for child in e:
-			if child.tag == 'p':
-				text = etree.tostring(child, method='text')
-				div_text == div_text+ "<br>" + child.text #because in my case, each entry has multiple <p>s
+			for f, e in enumerate(entries):
+				div_text = ''
+  			 		for child in e:
+						if child.tag == 'p':
+							text = etree.tostring(child, method='text')
+							div_text == div_text+ "<br>" + child.text #because in my case, each entry has multiple <p>s
 ```				
 
 For strings in headline, text, url, caption…, if you are intersted to see how we get them from xml files and our database, please check [generate.py].
 
-7. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
+8. Get the location on each slide of the map
+i). you should be able to get the location from tags in your XML files under `<dateline>` tags,which should look like
+`#<dateline><date when="xxx">xxx</date>.<placeName key="zz">yyy</placeName></dateline>`
+** Under `for child in e:`, on the same level of `if child.tag == 'p':` in ***Step 6 ***
+```
+							if child.tag == "dateline":
+								dateline = child
+								for child in dateline:
+									if child.tag == ns + "placeName":
+									place = child.get("key")
+```
+9. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
 
 * **Overview** : Create a dictionary for each slide of your StoryMap, then a python array to hold each slide of your storymap, finally a dictionary which includes the python array and other attributes of the StoryMap.
 1). Create a python array to hold each slide of your storymap.
