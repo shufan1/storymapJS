@@ -1,0 +1,7 @@
+# Working with StoryMapJS in Django
+This tutorial tries to explain how to create StoryMap from XML files in a Django project.
+
+We created the Storymaps for QI project through a customized python manage.py command in /srv/QI/QI/management/commands/generate.py, 
+store the data for Storymap as JSON object, and get the Storymap JSON object through Javascript on an HTML template
+
+First under your managemnt/commands directory, create a new python file, e.g. `generate.py`
