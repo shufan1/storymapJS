@@ -135,26 +135,28 @@ iii). StoryMapJS requires the input of latitude and longitude to be of float typ
 
 * **Overview** : Create a dictionary for each slide of your StoryMap, then a python array to hold each slide of your storymap, finally a dictionary which includes the python array and other attributes of the StoryMap.
 1). Create a python array to hold each slide of your storymap.
-Under ```for f, e in enumerate(entries):``` in ***Step 7***, on the same level of 
+Under `for f, e in enumerate(entries):` in ***Step 7***, at the same level of `for child in e:`
 ```
 objects=[]
 for slide in your_list #replace your_list with the list of 
   object = {
-          location: {            // required for all slides except "overview" slide
-          lat: decimal,      // latitude of point on map
-          lon: decimal       // longitude of point on map
+          "location": {            // required for all slides except "overview" slide
+          "lat": lat,      // latitude of point on map, has to be decimal
+          "lon": lon,       // longitude of point on map, has to be decimal
       },
-      text: {                // optional if media present
-          headline: string,
-          text: string       // may contain HTML markup
+      "text": {                // optional if media present
+         "headline": string,
+          "text": div_text      // div_text in this examplemay contain HTML markup, has to be string 
       },
-      media: {               // optional if text present
-          url: string,       // url for featured media
-          caption: string,   // optional; brief explanation of media content
-          credit: string     // optional; creator of media content
+      "media": {               // optional if text present
+          "url": string,       // url for featured media
+          "caption": string,   // optional; brief explanation of media content
+          "credit": string     // optional; creator of media content
       }
   }
   objects.append(object) #add each slide
 ```
+** I seperate lines for convenience to read, but in `generate.py`, put them on one line.
+2). Add a slide of overview to be the first page of your StoryMap.
 
 
