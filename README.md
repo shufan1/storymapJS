@@ -72,7 +72,7 @@ For example, I get a list of <div>s with `type = entry` for my StoryMaps:
 ```
 			objects=[]
 ```
-8. Itterate thorugh the list your have made in ***Step 6***, and get the content you want to put into your StoryMap from XML file
+8. Iterate thorugh the list your have made in ***Step 6***, and get the content you want to put into your StoryMap from XML file:
 e.g.:
 ```
 			for f, e in enumerate(entries):
@@ -138,7 +138,7 @@ iii). StoryMapJS requires the input of latitude and longitude to be of float typ
 ```
 10. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
 
-1). Create a python array to hold each slide of your storymap.
+i). Create a python array to hold each slide of your storymap.
 Under `for f, e in enumerate(entries):` in ***Step 8***, at the same level of `for child in e:`
 ```
   				object = {
@@ -158,23 +158,124 @@ Under `for f, e in enumerate(entries):` in ***Step 8***, at the same level of `f
   				}
   objects.append(object) #add each slide
 ```
+**For strings in headline, text, url, caption…, if you are intersted to see how we get them from xml files and our database  please check [`generate.py from QI`](https://github.com/HCDigitalScholarship/QI/blob/e42ddab2bece8fb36168b936a46278a6d49d8c94/QI/management/commands/generate.py)
+
 **I seperate lines for convenience to read, but in `generate.py`, put them on one line.** <br/>
-2). Add a slide of overview to be the first page of your StoryMap.
+ii). Add a slide of overview to be the first page of your StoryMap.
 **After finishing the loop** `for f, e in enumerate(entries):`, put:
 ```
 		cover = {
-    			type: "overview",      // optional; if present must be set to "overview"
-       		 	text: {                // optional if media present
-        			headline: string,
-        			text: string       // may contain HTML markup	
+    			"type": "overview",      // optional; if present must be set to "overview"
+       		 	"text": {                // optional if media present
+        			"headline": string,
+        			"text": string       // may contain HTML markup	
     			},
-    			media: {               // optional if text present
-        			url: string,       // url for featured media
-        			caption: string,   // optional; brief explanation of media content
-        			credit: string     // optional; creator of media content
+    			"media": {               // optional if text present
+        			"url": string,       // url for featured media
+        			"caption": string,   // optional; brief explanation of media content
+        			"credit": string     // optional; creator of media content
     			}
 		}
 		objects.insert(0,cover)
 ```
+iii). Put the `objects` list into the required data format 
+```
+		Map ={
+		    "width": integer,                // required for embed tool; width of StoryMap
+    		    "height": integer,               // required for embed tool; height of StoryMap
+    		    "font_css": string,              // optional; font set
+		    calculate_zoom: true,              // optional; defaults to true.
+		    storymap: {
+		        language: string,          // required; two-letter ISO language code
+		        map_type: string,          // required
+		        map_as_image: false,       // required
+		        map_subdomains: string,    // optional
+		        slides: objects           // required; array of slide objects we have created before
+   		      }
+		  }
+```
+		
+11.  create a json file in static to hold your Storymap
+```
+		data = map
+		with open('static/json/' + xml_file + '.json', 'w') as outfile:
+				json.dump(data, outfile, sort_keys=True)
+```
 
+12.  Create an HTML template under `/templates/storymaps` to hold your StoryMap in `generate.py`, include Javascript for StoryMap in it.
+```
+		html_str =""" {% load staticfiles%}
+             <!doctype html>
+<html class=”no-js” lang=”en”>
+<head>
+<title>"""+ xml_file + """ StoryMapJS </title>
+    <link rel="stylesheet" href="https://cdn.knightlab.com/libs/storymapjs/latest/css/storymap.css">
+</head>
 
+<body>
+<div>
+<div id = "story1" style = "background-color: #F0F8FF;">
+	   <div>
+	      <br />
+	      <h2 class = "text-center" style = "font-family: 'Alegreya Sans SC'; font-weight: 400; color: black"> StoryMap for """+ xml_file + """</h2>
+	        <!-- The StoryMap container can go anywhere on the page. Be sure to 
+    specify a width and height.  The width can be absolute (in pixels) or 
+    relative (in percentage), but the height must be an absolute value.  
+    Of course, you can specify width and height with CSS instead -->
+    <div id="mapdiv" style="width: 90%; height: 600px; margin:auto"></div> 
+    <br />
+    <br />
+	  </div>  
+</div>
+
+<!-- Your script tags should be placed before the closing body tag. -->
+    <script type="text/javascript" src="https://cdn.knightlab.com/libs/storymapjs/latest/js/storymap-min.js"></script>
+     <script>
+  // storymap_data can be an URL or a Javascript object
+ 
+      //var storymap_data = "{% static "json/StoryMapData.json" %}"; 
+      var storymap_data = "{% static "json/""" + xml_file + """.json" %}"; 
+      
+      // certain settings must be passed within a separate options object
+      var storymap_options = {};
+      var storymap = new VCO.StoryMap('mapdiv', storymap_data, storymap_options);
+      window.onresize = function(event) {
+          storymap.updateDisplay(); // this isn't automatic
+      }          
+  </script>
+  
+  
+  </body>
+</html>""" 
+
+		html_file = open('templates/story_maps'+xml_file+'.html','w')
+		html_file.write(html_str)
+		html_file.close()
+```
+13. If you want a page as a menu which  lists all the StorMaps you have created, create another html templates `list_of_storymaps.html`
+```
+		newfile=""
+		with open('templates/list_of_storymaps.html', 'r+') as f:
+		html_as_string=f.read()
+		soup = BeautifulSoup(html_as_string, 'html.parser')
+		sml = soup.find(id='storymaplist')
+		links = soup.find_all('a')
+		newtag= soup.new_tag('a', id='SMLink', href=xml_file)
+		atag= soup.new_tag('a', href=xml_file)
+		imgtag= soup.new_tag('img', src='path to the image you want')
+		litag = soup.new_tag('li', id='SMListitem')
+		divtag = soup.new_tag('div', id="SMtext")
+		divtagimg = soup.new_tag('div', id="SMimgdiv")
+		soup.ul.append(litag)
+		litag.append(atag)
+		atag.append(divtagimg)
+		divtagimg.append(imgtag)
+		atag.append(divtag)
+		divtag.append(newtag)
+		newtag.string = title_fin
+		newfile = soup.prettify()
+		with open('templates/list_of_storymaps.html','w') as f:
+		     f.write(newfile)
+```
+14 In your project directory:
+`python manage.py generate XML_file`
