@@ -9,8 +9,10 @@ The StoryMapJS JSON object should be a dictionary in the final.The structures of
 ## Before you start:
 In my project:
 * The data of places, locations are stored as Excel files in the order of `id_tei, name, county, state, Latitude (N), Longitude (W)` under `static/xls`as an **xlsx** file.
-* All manuscipts that are going to be used has already been transcribied into XML files, and stored under `static/xml`. 
-## Now let's begin the work
+* All manuscripts that are going to be used has already been transcribed into XML files, and stored under `static/xml`. 
+* In your models, you need to have a ***Place*** class, and it includes two attributes: latitude and longitude
+
+## Now let's begin the work.
 * **I think I am only able to make slides** 
 
 First, under your managemnt/commands directory, create a new python file, e.g. `generate.py`.
@@ -70,10 +72,11 @@ e.g.:
 ```
 			for f, e in enumerate(entries):
 				div_text = ''
-  			 		for child in e:
-						if child.tag == 'p':
-							text = etree.tostring(child, method='text')
-							div_text == div_text+ "<br>" + child.text #because in my case, each entry has multiple <p>s
+  			 	for child in e:
+					if child.tag == 'p':
+						text = etree.tostring(child, method='text')
+						div_text == div_text+ "<br>" + child.text
+						#because in my case, each entry has multiple <p>s
 ```				
 
 For strings in headline, text, url, caption…, if you are intersted to see how we get them from xml files and our database, please check [generate.py].
@@ -83,17 +86,56 @@ i). you should be able to get the location from tags in your XML files under `<d
 `#<dateline><date when="xxx">xxx</date>.<placeName key="zz">yyy</placeName></dateline>`
 ** Under `for child in e:`, on the same level of `if child.tag == 'p':` in ***Step 6 ***
 ```
-							if child.tag == "dateline":
-								dateline = child
-								for child in dateline:
-									if child.tag == ns + "placeName":
+						if child.tag == "dateline":
+							dateline = child
+							for child in dateline:
+								if child.tag == ns + "placeName":
 									place = child.get("key")
+```
+ii). Get latitude and longitude of the place from your database
+```
+				dj_place_list = Place.objects.filter(id_tei=place) #this list should only have one object at most
+				if dj_place_list==None or dj_place_list==list() or len(dj_place_list)==0: 		
+					print (place, "not found in database \n")
+					#if the place is not in database, we can't create a StoryMap slide for it.
+				else: 
+					for i in dj_place_list:
+						if i.latitude != None:
+							dj_place = i 
+							break
+							 #if it passes the if statement, skip the loop 
+						else:
+							dj_place = i
+							# either case will allow us to get the only object in dj_place_list
+					lat = dj_place.latitude
+					lon = dj_place.longitude
+``
+iii). StoryMapJS requires the input of latitude and longitude to be of float type. Therefore, we make them float; otherwise, we can default latitude and longitude. StoryMapJS requires the input of latitude and longitude to be of float type. Therefore, we make them float; otherwise, we can default latitude and longitude. 
+```
+					if lat =="" or lon== "":
+						print ("No lat or lon for",place,"I set this to lat to 42 and lon to 83. \n")
+						lat = 42 #LOCATION
+						lon = 83#LOCATION
+					else:
+						print (place, "had lat, lon:",lat,lon,"\n")
+					try:
+						float(lat)
+					except ValueError:
+						print ("People are bad at entering data, lat for this is:", lat)
+						lat = 42
+						print ("set lat to 42")
+					try:
+						float(lon)
+					except ValueError:
+						print ("People are bad at entering data, lon for this is:", lon)
+						lon = 83
+						print ("set lon to 83")	
 ```
 9. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
 
 * **Overview** : Create a dictionary for each slide of your StoryMap, then a python array to hold each slide of your storymap, finally a dictionary which includes the python array and other attributes of the StoryMap.
 1). Create a python array to hold each slide of your storymap.
-Under ```for f, e in enumerate(entries):``` in ***Step 7***
+Under ```for f, e in enumerate(entries):``` in ***Step 7***, on the same level of 
 ```
 objects=[]
 for slide in your_list #replace your_list with the list of 
