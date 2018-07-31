@@ -67,7 +67,12 @@ For example, I get a list of <div>s with `type = entry` for my StoryMaps:
 ```
 #You could always add `print()` in your command. Print statements will be excuted when you run `python manage.pt command_name arguments`. They will be helpful in debugging. 
 
-7. Itterate thorugh the list your have made in ***Step 6***, and get the content you want to put into your StoryMap from XML file
+7. Create a empty python list that will hold each slide of the StoryMap at the end
+* **Overview** : Get the content and attributes of each slide of the map, create a dictionary for each slide of your StoryMap, then a python array to hold each slide of your storymap, finally a dictionary which includes the python array and other attributes of the StoryMap.
+```
+			objects=[]
+```
+8. Itterate thorugh the list your have made in ***Step 6***, and get the content you want to put into your StoryMap from XML file
 e.g.:
 ```
 			for f, e in enumerate(entries):
@@ -81,10 +86,10 @@ e.g.:
 
 For strings in headline, text, url, caption…, if you are intersted to see how we get them from xml files and our database, please check [generate.py].
 
-8. Get the location on each slide of the map
+9. Get the location on each slide of the map
 i). you should be able to get the location from tags in your XML files under `<dateline>` tags,which should look like
-`#<dateline><date when="xxx">xxx</date>.<placeName key="zz">yyy</placeName></dateline>`
-** Under `for child in e:`, on the same level of `if child.tag == 'p':` in ***Step 6 ***
+`#<dateline><date when="xxx">xxx</date>.<placeName key="zz">yyy</placeName></dateline>` <br/>
+Under `for child in e:`, on the same level of `if child.tag == 'p':` in ***Step 6***
 ```
 						if child.tag == "dateline":
 							dateline = child
@@ -131,32 +136,45 @@ iii). StoryMapJS requires the input of latitude and longitude to be of float typ
 						lon = 83
 						print ("set lon to 83")	
 ```
-9. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
+10. create JSON object following the syntax on https://storymap.knightlab.com/advanced/
 
-* **Overview** : Create a dictionary for each slide of your StoryMap, then a python array to hold each slide of your storymap, finally a dictionary which includes the python array and other attributes of the StoryMap.
 1). Create a python array to hold each slide of your storymap.
-Under `for f, e in enumerate(entries):` in ***Step 7***, at the same level of `for child in e:`
+Under `for f, e in enumerate(entries):` in ***Step 8***, at the same level of `for child in e:`
 ```
-objects=[]
-for slide in your_list #replace your_list with the list of 
-  object = {
-          "location": {            // required for all slides except "overview" slide
-          "lat": lat,      // latitude of point on map, has to be decimal
-          "lon": lon,       // longitude of point on map, has to be decimal
-      },
-      "text": {                // optional if media present
-         "headline": string,
-          "text": div_text      // div_text in this examplemay contain HTML markup, has to be string 
-      },
-      "media": {               // optional if text present
-          "url": string,       // url for featured media
-          "caption": string,   // optional; brief explanation of media content
-          "credit": string     // optional; creator of media content
-      }
-  }
+  				object = {
+          				"location": {            // required for all slides except "overview" slide
+          				"lat": lat,      // latitude of point on map, has to be decimal
+		  			"lon": lon,       // longitude of point on map, has to be decimal
+      				     },
+      					"text": {                // optional if media present
+        				"headline": string,
+         				"text": div_text      // div_text in this examplemay contain HTML markup, has to be string 
+     				     },
+      					"media": {               // optional if text present
+         			        "url": string,       // url for featured media
+          				"caption": string,   // optional; brief explanation of media content
+          				"credit": string     // optional; creator of media content
+      				     }
+  				}
   objects.append(object) #add each slide
 ```
-** I seperate lines for convenience to read, but in `generate.py`, put them on one line.
+**I seperate lines for convenience to read, but in `generate.py`, put them on one line.** <br/>
 2). Add a slide of overview to be the first page of your StoryMap.
+**After finishing the loop** `for f, e in enumerate(entries):`, put:
+```
+		cover = {
+    			type: "overview",      // optional; if present must be set to "overview"
+       		 	text: {                // optional if media present
+        			headline: string,
+        			text: string       // may contain HTML markup	
+    			},
+    			media: {               // optional if text present
+        			url: string,       // url for featured media
+        			caption: string,   // optional; brief explanation of media content
+        			credit: string     // optional; creator of media content
+    			}
+		}
+		objects.insert(0,cover)
+```
 
 
