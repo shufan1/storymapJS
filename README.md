@@ -109,7 +109,7 @@ ii). Get latitude and longitude of the place from your database
 							# either case will allow us to get the only object in dj_place_list
 					lat = dj_place.latitude
 					lon = dj_place.longitude
-``
+```
 iii). StoryMapJS requires the input of latitude and longitude to be of float type. Therefore, we make them float; otherwise, we can default latitude and longitude. StoryMapJS requires the input of latitude and longitude to be of float type. Therefore, we make them float; otherwise, we can default latitude and longitude. 
 ```
 					if lat =="" or lon== "":
